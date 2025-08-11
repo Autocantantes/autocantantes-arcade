@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Autocantantes vs. Las Multis — Mini Arcade</title>
+<style>
+  :root { --bg:#0e0e12; --ink:#f2f2f2; --accent:#ff3c7e; --good:#39d98a; --bad:#ff5d5d; --mid:#ffc857;}
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--ink)}
+  header{padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #222}
+  .logo{width:40px;height:40px;border:2px solid var(--ink);display:grid;place-items:center;font-weight:700}
+  h1{font-size:18px;margin:0} .sub{opacity:.75;font-size:12px}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  nav{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  button, .btn{background:#1b1b22;color:var(--ink);border:1px solid #333;border-radius:10px;padding:10px 14px;cursor:pointer}
+  button:hover{border-color:#555} .pill{font-size:12px;opacity:.9}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:960px){.grid{grid-template-columns:1.2fr .8fr}}
+  .card{border:1px solid #222;border-radius:14px;padding:14px;background:#121217}
+  canvas{width:100%;height:300px;background:#0a0a0f;border:1px solid #222;border-radius:12px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .bar{height:16px;background:#1c1c25;border:1px solid #333;border-radius:10px;overflow:hidden}
+  .fill{height:100%;background:var(--good);width:0%}
+  .badge{font-size:12px;padding:4px 8px;border:1px solid #444;border-radius:999px}
+  .note{font-size:12px;opacity:.75}
+  .link{color:var(--accent);text-decoration:none}
+  .muted{opacity:.7}
+  .center{text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">AC</div>
+  <div>
+    <h1>Autocantantes vs. Las Multis — Mini Arcade</h1>
+    <div class="sub">Héroes indie combatiendo cláusulas abusivas, con humor y ritmo 🎸</div>
+  </div>
+</header>
+
+<div class="wrap grid">
+  <!-- Columna izquierda: juegos -->
+  <section class="card">
+    <nav>
+      <button onclick="showTab('tasks')">1) Tareas del Sello</button>
+      <button onclick="showTab('runner')">2) Runner del Contrato</button>
+      <button onclick="showTab('rhythm')">3) Batalla de Ritmo Lite</button>
+      <button class="pill" onclick="toggleMusic()">🎵 Música: <span id="musicState">OFF</span></button>
+    </nav>
+
+    <!-- TAB 1: TASKS -->
+    <div id="tab_tasks">
+      <h2>1) Tareas del Sello (clicker)</h2>
+      <p class="muted">Completa tareas antes de que <b>La Multi</b> meta “costes creativos” y te robe tiempo. Haz clic para avanzar.</p>
+
+      <div class="row">
+        <div class="badge">Día <span id="day">1</span></div>
+        <div class="badge">Fans ❤️ <span id="fans">0</span></div>
+        <div class="badge">Puntos ⭐ <span id="scoreTasks">0</span> (récord <span id="hiTasks">0</span>)</div>
+      </div>
+      <br/>
+      <div class="row">
+        <div style="flex:1">
+          <div>🎙️ Grabar Voces <span class="muted" id="t1p">0%</span></div>
+          <div class="bar"><div id="t1" class="fill"></div></div>
+          <div style="height:8px"></div>
+          <div>📣 Postear Video Cómic <span class="muted" id="t2p">0%</span></div>
+          <div class="bar"><div id="t2" class="fill"></div></div>
+          <div style="height:8px"></div>
+          <div>🚚 Enviar Merch <span class="muted" id="t3p">0%</span></div>
+          <div class="bar"><div id="t3" class="fill"></div></div>
+        </div>
+        <div style="width:220px;display:grid;gap:8px">
+          <button onclick="tapTask(1)">+ Producir 🎚️</button>
+          <button onclick="tapTask(2)">+ Publicar 📤</button>
+          <button onclick="tapTask(3)">+ Logística 📦</button>
+          <button onclick="endDay()">Terminar Día ▶</button>
+          <button onclick="resetTasks()">Reiniciar 🔁</button>
+        </div>
+      </div>
+      <p class="note">Cada día la Multi aumenta <b>trabas</b> (pequeños retrocesos). Completa 3 barras para ganar fans y puntos.</p>
+    </div>
+
+    <!-- TAB 2: RUNNER -->
+    <div id="tab_runner" style="display:none">
+      <h2>2) Runner del Contrato (arcade)</h2>
+      <p class="muted">Salta (barra espaciadora o toque) para esquivar 🧾 contratos trampa y recoge 🎵 notas. Dura 60s.</p>
+      <div class="row">
+        <div class="badge">Puntos ⭐ <span id="scoreRun">0</span> (récord <span id="hiRun">0</span>)</div>
+        <div class="badge">Tiempo ⏱️ <span id="timeRun">60</span>s</div>
+      </div>
+      <canvas id="runner" width="700" height="300"></canvas>
+      <div class="row">
+        <button onclick="startRunner()">Iniciar ▶</button>
+        <button onclick="stopRunner()">Parar ⏸</button>
+        <button onclick="resetRunner()">Reiniciar 🔁</button>
+      </div>
+    </div>
+
+    <!-- TAB 3: RHYTHM -->
+    <div id="tab_rhythm" style="display:none">
+      <h2>3) Batalla de Ritmo Lite</h2>
+      <p class="muted">Pulsa <b>F</b> — <b>J</b> cuando la nota caiga en la zona. Corta, simple y adictivo.</p>
+      <div class="row">
+        <div class="badge">Puntos ⭐ <span id="scoreRh">0</span> (récord <span id="hiRh">0</span>)</div>
+        <div class="badge">Combo 🔥 <span id="combo">0</span></div>
+        <div class="badge">Precisión 🎯 <span id="acc">0%</span></div>
+      </div>
+      <canvas id="rhythm" width="700" height="300"></canvas>
+      <div class="row">
+        <button onclick="startRhythm()">Iniciar ▶</button>
+        <button onclick="resetRhythm()">Reiniciar 🔁</button>
+        <button onclick="loadTrack()">Cargar mi MP3 🎵</button>
+      </div>
+      <p class="note">Tip: pulsa “Cargar mi MP3” y elige un archivo de tu música (se reproduce localmente, no se sube).</p>
+    </div>
+  </section>
+
+  <!-- Columna derecha: info/monetización -->
+  <aside class="card">
+    <h3>Promoción & Monetización</h3>
+    <ul>
+      <li>Inserta este juego en tu web y enlázalo desde YouTube.</li>
+      <li>Botón “Apoya el sello” hacia tu <b>tienda/merch</b> o donación.</li>
+      <li>Desbloqueables: al superar récords, muestra cupones o enlaces a temas ocultos.</li>
+    </ul>
+    <div class="row">
+      <a class="btn" href="#" onclick="alert('Ejemplo: aquí link a tu tienda/merch.');return false;">🛒 Apoya el sello</a>
+      <a class="btn" href="#" onclick="share()">🔗 Compartir</a>
+    </div>
+    <p class="note">Todo corre en HTML5: fácil de colgar en GitHub Pages, Netlify o itch.io.</p>
+    <hr style="border-color:#222">
+    <h4>Audio</h4>
+    <p class="note">Pon tu MP3 en el modo Ritmo (“Cargar mi MP3”) o cambia <code>defaultTrack</code> por la URL de tu canción.</p>
+  </aside>
+</div>
+
+<script>
+/* ---------- Estado global & utilidades ---------- */
+const $ = sel => document.querySelector(sel);
+const musicState = $("#musicState");
+let bgAudio, bgOn = false;
+let defaultTrack = ""; // Pon aquí una URL directa a tu MP3 si quieres música de fondo.
+
+function showTab(name){
+  ["tasks","runner","rhythm"].forEach(id=>{
+    const el = $("#tab_"+id); if(!el) return;
+    el.style.display = (id===name) ? "block" : "none";
+  });
+}
+
+function toggleMusic(){
+  if(!bgAudio){
+    bgAudio = new Audio(defaultTrack || beepLoop());
+    bgAudio.loop = true;
+    bgAudio.volume = 0.25;
+  }
+  if(bgOn){ bgAudio.pause(); musicState.textContent="OFF"; }
+  else { bgAudio.play(); musicState.textContent="ON"; }
+  bgOn = !bgOn;
+}
+
+// Sencillo “beep loop” generado por data URI (por si no hay MP3)
+function beepLoop(){
+  // tono básico en data:audio/wav (muy corto, se loopea)
+  return "data:audio/wav;base64,UklGRmQCAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABYAAAABAAABAACAgICA////AAAAAP///wAA";
+}
+
+function share(){
+  if(navigator.share){
+    navigator.share({title:"Autocantantes Mini Arcade",text:"Juega: artistas indie vs. las multis",url:location.href});
+  }else{
+    navigator.clipboard.writeText(location.href);
+    alert("Enlace copiado. ¡Comparte!");
+  }
+}
+
+function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+
+/* ---------- 1) TAREAS DEL SELLO (CLICKER) ---------- */
+let day=1,fans=0,scoreTasks=0,hiTasks= +localStorage.getItem("hiTasks")||0;
+let bars=[0,0,0];      // progreso 0..100
+let friction=2;        // retroceso diario
+updateTasksUI();
+
+function updateTasksUI(){
+  $("#day").textContent=day; $("#fans").textContent=fans;
+  $("#scoreTasks").textContent=scoreTasks; $("#hiTasks").textContent=hiTasks;
+  for(let i=1;i<=3;i++){
+    $("#t"+i).style.width=bars[i-1]+"%";
+    $("#t"+i+"p").textContent=bars[i-1]+"%";
+  }
+}
+
+function tapTask(i){
+  bars[i-1] = clamp(bars[i-1]+10,0,100);
+  scoreTasks+=1; maybeLevelUp();
+  updateTasksUI();
+  checkComplete();
+}
+
+function checkComplete(){
+  if(bars.every(b=>b>=100)){
+    let gain = 10 + Math.floor(Math.random()*6);
+    fans += gain; scoreTasks += 25;
+    alert("🎉 Día perfecto: +"+gain+" fans y +25 puntos.");
+    bars=[0,0,0]; updateTasksUI();
+  }
+}
+
+function maybeLevelUp(){
+  if(scoreTasks>hiTasks){ hiTasks=scoreTasks; localStorage.setItem("hiTasks",hiTasks); }
+}
+
+function endDay(){
+  day++;
+  // La Multi mete trabas: retroceso aleatorio
+  bars = bars.map(b=>clamp(b - (friction + Math.floor(Math.random()*5)),0,100));
+  // Evento aleatorio con humor
+  const events = [
+    "La Multi propone 'costes creativos': -5% en todo.",
+    "Te invitan a firmar por 'exposición': retroceso moderado.",
+    "Un fan hace un fanzine viral: +15 puntos.",
+    "Bug en la plataforma: -10% publicación."
+  ];
+  const pick = events[Math.floor(Math.random()*events.length)];
+  if(pick.includes("+15")) scoreTasks+=15; else bars = bars.map(b=>clamp(b - (pick.includes("-10")?10:5),0,100));
+  maybeLevelUp();
+  updateTasksUI();
+  alert("📅 Nuevo día. Evento: "+pick);
+}
+
+function resetTasks(){ day=1;fans=0;scoreTasks=0;bars=[0,0,0];updateTasksUI(); }
+
+/* ---------- 2) RUNNER DEL CONTRATO ---------- */
+const rcv = $("#runner"); const rx = rcv.getContext("2d");
+let runState = {running:false,t:0,playerY:230,vy:0,grav:0.7,score:0,hi:+localStorage.getItem("hiRun")||0,time:60,objs:[],notes:[]};
+function startRunner(){
+  if(runState.running) return;
+  runState = {...runState,running:true,t:0,playerY:230,vy:0,score:0,time:60,objs:[],notes:[]};
+  loopRunner();
+  timerRunner();
+}
+function stopRunner(){ runState.running=false; }
+function resetRunner(){ stopRunner(); runState.score=0; runState.time=60; $("#scoreRun").textContent=0; $("#timeRun").textContent=60; }
+
+function timerRunner(){
+  const id = setInterval(()=>{
+    if(!runState.running) { clearInterval(id); return; }
+    runState.time--; $("#timeRun").textContent=runState.time;
+    if(runState.time<=0){ runState.running=false; endRunner(); clearInterval(id); }
+  },1000);
+}
+
+function endRunner(){
+  alert("Fin del turno. Puntuación: "+runState.score);
+  if(runState.score>runState.hi){ runState.hi=runState.score; localStorage.setItem("hiRun",runState.hi); }
+  $("#hiRun").textContent=runState.hi;
+}
+
+function loopRunner(){
+  if(!runState.running) return;
+  rx.clearRect(0,0,rcv.width,rcv.height);
+  // suelo
+  rx.fillStyle="#1b1b22"; rx.fillRect(0,260,rcv.width,40);
+  // jugador (superhéroe indie)
+  rx.fillStyle="#39d98a"; rx.fillRect(60,runState.playerY,30,30);
+
+  // Spawners
+  if(Math.random()<0.03) runState.objs.push({x:rcv.width,y:230,w:30,h:30}); // contratos
+  if(Math.random()<0.05) runState.notes.push({x:rcv.width,y:200,w:14,h:14}); // notas
+
+  // mover y dibujar contratos
+  rx.fillStyle="#ff5d5d";
+  for(let i=runState.objs.length-1;i>=0;i--){
+    const o=runState.objs[i]; o.x -= 5;
+    rx.fillRect(o.x,o.y,o.w,o.h);
+    // colisión
+    if(collide(60,runState.playerY,30,30,o.x,o.y,o.w,o.h)){ runState.score = Math.max(0, runState.score-10); o.x=-999; shake(rcv); }
+    if(o.x<-40) runState.objs.splice(i,1);
+  }
+  // mover y dibujar notas
+  rx.fillStyle="#ffc857";
+  for(let i=runState.notes.length-1;i>=0;i--){
+    const n=runState.notes[i]; n.x -= 6;
+    rx.fillRect(n.x,n.y,n.w,n.h);
+    if(collide(60,runState.playerY,30,30,n.x,n.y,n.w,n.h)){ runState.score += 5; runBeep(660,0.06); runState.notes.splice(i,1); }
+    if(n.x<-20) runState.notes.splice(i,1);
+  }
+
+  // física salto
+  runState.vy += runState.grav; runState.playerY += runState.vy;
+  if(runState.playerY>230){ runState.playerY=230; runState.vy=0; }
+
+  // UI
+  $("#scoreRun").textContent=runState.score;
+  requestAnimationFrame(loopRunner);
+}
+
+function collide(ax,ay,aw,ah,bx,by,bw,bh){
+  return ax<bx+bw && ax+aw>bx && ay<by+bh && ay+ah>by;
+}
+
+function shake(canvas){
+  canvas.style.transform="translateX(4px)"; setTimeout(()=>canvas.style.transform="",60);
+  runBeep(110,0.08);
+}
+
+function runBeep(freq,dur){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination);
+    o.frequency.value=freq; g.gain.value=.04; o.start();
+    setTimeout(()=>{o.stop();ctx.close();}, dur*1000);
+  }catch(e){}
+}
+
+window.addEventListener("keydown",e=>{
+  if(e.code==="Space"){ runState.vy=-12; runBeep(440,0.06); e.preventDefault(); }
+});
+rcv.addEventListener("pointerdown",()=>{ runState.vy=-12; runBeep(440,0.06); });
+
+/* ---------- 3) RITMO LITE ---------- */
+const rhcv=$("#rhythm"), rhx=rhcv.getContext("2d");
+let rh = {running:false,notes:[],y:0,score:0,combo:0,good:0,total:0,hi:+localStorage.getItem("hiRh")||0};
+let track = new Audio(); track.volume=.6;
+
+function startRhythm(){
+  if(rh.running) return;
+  rh={...rh,running:true,notes:[],score:0,combo:0,good:0,total:0};
+  // Generar notas simples en 2 columnas (F y J) por 30s
+  const len=30*2; // dos por segundo aprox
+  for(let i=0;i<len;i++){
+    rh.notes.push({lane:(Math.random()<0.5?0:1), y:-i*120, hit:false});
+  }
+  loopRhythm();
+  try{ if(track.src) track.currentTime=0, track.play(); }catch(e){}
+}
+
+function resetRhythm(){ rh.running=false; rh.notes=[]; rh.score=0; rh.combo=0; rh.good=0; rh.total=0; updateRhUI(); try{track.pause();}catch(e){} }
+
+function loadTrack(){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="audio/*";
+  inp.onchange=()=>{
+    const f=inp.files[0]; if(!f) return;
+    track.src=URL.createObjectURL(f); track.load(); alert("✅ MP3 cargado. Dale a Iniciar.");
+  };
+  inp.click();
+}
+
+function loopRhythm(){
+  if(!rh.running) return;
+  rhx.clearRect(0,0,rhcv.width,rhcv.height);
+  // Lanes y zona de impacto
+  rhx.fillStyle="#1b1b22"; rhx.fillRect(0,0,rhcv.width,rhcv.height);
+  const laneW=rhcv.width/2; const hitY=rhcv.height-60;
+  rhx.fillStyle="#222"; rhx.fillRect(0,hitY, rhcv.width, 6);
+
+  // Dibujar notas
+  rhx.fillStyle="#39d98a";
+  rh.notes.forEach(n=>{
+    if(n.hit) return;
+    n.y += 4.5;
+    const x = n.lane===0? laneW*0.25 : laneW*1.25;
+    rhx.fillRect(x-20, n.y, 40, 20);
+    // Miss si pasa
+    if(n.y>hitY+24){ n.hit=true; rh.combo=0; updateRhUI(); }
+  });
+
+  // fin si todo pasó
+  if(rh.notes.every(n=>n.hit)){
+    rh.running=false;
+    alert("Fin. Puntos: "+rh.score+" | Precisión: "+acc()+"%");
+    if(rh.score>rh.hi){ rh.hi=rh.score; localStorage.setItem("hiRh",rh.hi); }
+    updateRhUI(); try{track.pause();}catch(e){}
+    return;
+  }
+
+  requestAnimationFrame(loopRhythm);
+}
+
+function acc(){ return rh.total? Math.round((rh.good/rh.total)*100):0; }
+
+function hit(lane){
+  // buscar la nota más cercana a la zona
+  const hitY=rhcv.height-60;
+  let best=null, idx=-1, bestDist=9999;
+  rh.notes.forEach((n,i)=>{
+    if(n.hit||n.lane!==lane) return;
+    const d=Math.abs((n.y+10)-hitY);
+    if(d<bestDist){ bestDist=d; best=n; idx=i; }
+  });
+  if(best && bestDist<24){
+    best.hit=true; rh.good++; rh.combo++; rh.score += 10 + rh.combo;
+    runBeep(440+lane*120,0.05);
+  }else{
+    rh.combo=0; runBeep(120,0.05);
+  }
+  rh.total++; updateRhUI();
+}
+
+function updateRhUI(){
+  $("#scoreRh").textContent=rh.score;
+  $("#combo").textContent=rh.combo;
+  $("#acc").textContent=acc()+"%";
+  $("#hiRh").textContent=rh.hi;
+}
+
+window.addEventListener("keydown",e=>{
+  if(showing('rhythm')){
+    if(e.key.toLowerCase()==='f') hit(0);
+    if(e.key.toLowerCase()==='j') hit(1);
+  }
+});
+rhcv.addEventListener("pointerdown",e=>{
+  // toque izquierda/derecha
+  const lane = (e.offsetX < rhcv.width/2)?0:1; hit(lane);
+});
+
+function showing(id){ return $("#tab_"+id).style.display!=='none'; }
+
+/* ---------- helpers UI ---------- */
+function $(sel){ return document.querySelector(sel); }
+</script>
+</body>
+</html>

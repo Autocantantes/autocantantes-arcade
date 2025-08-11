@@ -1,276 +1,247 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Autocantantes — Beat Brawler Arcade</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Autocantantes — Beat Brawler (Chill)</title>
 <style>
-  :root{--bg:#0c0c12;--ink:#f4f4f4;--accent:#ff3c7e;--good:#39d98a;--warn:#ffc857;--bad:#ff5d5d;}
-  *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#0b0b10,#111123);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-  header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #1f1f2a;background:#0f0f18}
-  .logo{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;border:1px solid #2a2a3b;overflow:hidden;background:#141426}
-  .logo img{width:100%;height:100%;object-fit:cover;display:block}
+  :root{--bg:#0b0b12;--ink:#f7f7fb;--accent:#ff3c7e;--good:#38d993;--warn:#ffd166;--bad:#ff5d5d;}
+  *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0a0a12,#12122a);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  header{display:flex;gap:10px;align-items:center;padding:12px;border-bottom:1px solid #1e1e2e;background:#0f0f1a}
+  .logo{width:48px;height:48px;border-radius:10px;border:1px solid #2a2a44;overflow:hidden;background:#14142a;display:grid;place-items:center}
+  .logo img{width:100%;height:100%;object-fit:contain;display:block}
   .logo span{font-weight:800}
-  h1{font-size:18px;margin:0} .sub{opacity:.8;font-size:12px}
+  h1{font-size:18px;margin:0}.sub{opacity:.8;font-size:12px}
   .wrap{max-width:1100px;margin:0 auto;padding:12px}
-  .grid{display:grid;gap:12px}
-  @media(min-width:940px){.grid{grid-template-columns:1fr 320px}}
-  .card{background:#121225;border:1px solid #1f1f2a;border-radius:14px;padding:12px}
-  canvas{width:100%;height:420px;background:#0a0a14;border:1px solid #23233a;border-radius:12px;display:block}
+  .grid{display:grid;gap:12px}@media(min-width:960px){.grid{grid-template-columns:1fr 320px}}
+  .card{background:#121229;border:1px solid #202040;border-radius:14px;padding:12px}
+  canvas{width:100%;height:460px;background:#0a0a16;border:1px solid #24244a;border-radius:12px;display:block}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .btn{background:#191932;border:1px solid #2a2a44;color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer}
-  .btn:hover{border-color:#3a3a66}
-  .pill{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #2a2a44;background:#16162c}
-  .stat{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid #2a2a44;background:#14142a}
-  .right .tip{font-size:12px;opacity:.8}
-  .hud{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-  .touch{display:flex;gap:8px;margin-top:8px}
-  .touch button{flex:1;padding:12px 10px}
+  .btn{background:#191936;border:1px solid #2a2a55;color:var(--ink);padding:10px 14px;border-radius:10px;cursor:pointer}
+  .btn:hover{border-color:#3c3c77}.pill{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid #2a2a55;background:#151532}
+  .stat{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid #2a2a55;background:#151533}
   .muted{opacity:.75}
+  .slider{appearance:none;width:100%;height:6px;border-radius:4px;background:#1c1c3c;outline:none}
+  .slider::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #fff1}
+  .touch{display:flex;gap:8px;margin-top:8px}.touch button{flex:1;padding:12px 10px}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">
-    <!-- si añades autocantantes-logo.jpg al lado del index, se verá aquí -->
-    <img src="autocantantes-logo.jpg" alt="AC" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'AC'}))">
+    <!-- Si subes tu PNG del logo junto a index.html, se mostrará. Si falla, verás "AC". -->
+    <img src="AUTOLOGOS NUEVOS CUERNOS PEQUEÑOS TRASPARENTE.png" alt="AC"
+         onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'AC'}))">
   </div>
   <div>
-    <h1>Autocantantes — Beat Brawler Arcade</h1>
-    <div class="sub">Superhéroes indie vs multinacionales • combo, power‑ups y fanzine‑style</div>
+    <h1>Autocantantes — Beat Brawler (Modo Chill)</h1>
+    <div class="sub">Héroe‑guitarra vs. multinacionales • combo, power‑ups y fanzine vibes</div>
   </div>
 </header>
 
 <div class="wrap grid">
   <section class="card">
-    <div class="hud">
+    <div class="row">
       <div class="stat">⭐ Puntos: <b id="score">0</b> (récord <b id="hiscore">0</b>)</div>
       <div class="stat">🔥 Combo: <b id="combo">0</b></div>
       <div class="stat">❤️ Vidas: <b id="lives">3</b></div>
       <div class="stat">🎚️ Dificultad: <b id="diff">1</b></div>
-      <button class="pill" id="btnMusic">🎵 Música: OFF</button>
       <button class="pill" id="btnPause">⏸ Pausa</button>
       <button class="pill" id="btnReset">🔁 Reiniciar</button>
+      <button class="pill" id="btnMusic">🎵 Música: OFF</button>
     </div>
-    <canvas id="game" width="800" height="420"></canvas>
+    <canvas id="game" width="900" height="460"></canvas>
     <div class="touch">
       <button class="btn" id="upBtn">↑ Subir</button>
       <button class="btn" id="fireBtn">🎵 Disparar</button>
       <button class="btn" id="downBtn">↓ Bajar</button>
     </div>
-    <p class="muted">Controles: W/S o ↑/↓ para carril, Espacio para disparar, P para pausa.</p>
+    <p class="muted">Controles: W/S o ↑/↓ para carril • Espacio dispara • P pausa</p>
   </section>
 
-  <aside class="card right">
-    <h3>Cómo jugar</h3>
-    <ul>
-      <li>Mantén el **combo** golpeando seguido; sube la puntuación por nota.</li>
-      <li>Recoge <b>FANZINES</b> 📰 para **nota triple** y escudo corto.</li>
-      <li>Evita **cláusulas** 🧾 y **drones** 🛰️ (quitan vida y combo).</li>
-    </ul>
-    <h3>Personaliza</h3>
-    <p class="tip">Cambia los colores/velocidad en el código (sección CONFIG). Pon tu MP3 en <code>defaultTrack</code> o sube un <b>autocantantes-logo.jpg</b>.</p>
-    <button class="btn" id="loadTrack">Cargar mi MP3 🎧</button>
-    <p class="muted">El audio se reproduce localmente (no se sube a ningún servidor).</p>
+  <aside class="card">
+    <h3>⚙️ Ajustes (sin tocar código)</h3>
+    <label>Velocidad base <span id="sv">2.2</span></label>
+    <input id="speed" class="slider" type="range" min="1.5" max="4.0" step="0.1" value="2.2">
+    <label>Frecuencia de enemigos (más bajo = más difícil) <span id="sp">72</span>f</label>
+    <input id="spawn" class="slider" type="range" min="42" max="110" step="2" value="72">
+    <label>Tamaño de hitbox (más alto = más fácil) <span id="hb">1.2</span>x</label>
+    <input id="hitbox" class="slider" type="range" min="0.8" max="1.6" step="0.05" value="1.2">
+    <div style="height:10px"></div>
+    <button class="btn" id="btnChill">☁️ Modo Chill</button>
+    <button class="btn" id="btnNormal">🎸 Normal</button>
+    <button class="btn" id="btnInsane">🔥 Insano</button>
+    <hr style="border-color:#222">
+    <h3>Audio</h3>
+    <button class="btn" id="loadTrack">Cargar mi MP3</button>
+    <p class="muted">Se reproduce localmente. Sube tu PNG del logo junto a este archivo para que se vea arriba.</p>
   </aside>
 </div>
 
 <script>
-/*** ============ CONFIG BÁSICA ============ ***/
-const LANES = 3;                // carriles
-const SPEED_BASE = 3.2;         // velocidad inicial
-const DIFF_STEP = 0.15;         // incremento por nivel
-const SPAWN_EVERY = 60;         // frames entre spawns (baja = más enemigos)
-const MAX_LIVES = 3;
-const defaultTrack = "";        // pega aquí URL directa a tu MP3 si quieres música de fondo
+/*************** CONFIG & ESTADO ***************/
+const LANES=3;
+let SPEED_BASE=2.2;        // más lenta
+let DIFF_STEP=0.12;
+let SPAWN_EVERY=72;        // spawns menos agresivos
+let HITBOX=1.2;            // hitbox “amable”
+const MAX_LIVES=3;
+const defaultTrack="";     // pega aquí una URL directa a tu MP3 si quieres música base
 
-/*** ============ UTIL ============ ***/
-const $ = s => document.querySelector(s);
-const rnd = (a,b)=>Math.random()*(b-a)+a;
-const chance = p => Math.random()<p;
-const clamp = (n,mi,ma)=>Math.max(mi,Math.min(ma,n));
+const $=s=>document.querySelector(s);
+const rnd=(a,b)=>Math.random()*(b-a)+a;
+const clamp=(n,mi,ma)=>Math.max(mi,Math.min(ma,n));
 
-/*** ============ ESTADO DE JUEGO ============ ***/
-const cv = $("#game"), cx = cv.getContext("2d");
+const cv=$("#game"), cx=cv.getContext("2d");
 let w=cv.width,h=cv.height, frame=0, paused=false;
-let laneY = i => (h*0.2) + i*(h*0.3); // posiciones verticales
-let hero = {lane:1,x:80,y:0,rad:18,cd:0,shield:0,power:0,alive:true};
-let bullets=[], enemies=[], pickups=[], particles=[];
-let score=0, combo=0, hiscore= +localStorage.getItem("ac_hiscore")||0, lives=MAX_LIVES, diff=1, speed=SPEED_BASE, spawnTick=0;
+const laneY=i=>(h*0.18)+i*(h*0.32);
 
-/*** ============ AUDIO CHILL ============ ***/
-let musicOn=false, bg= new Audio(); bg.loop=true; bg.volume=.35;
-if(defaultTrack){ bg.src=defaultTrack; }
-function beep(freq=440, dur=0.07, vol=0.05){
-  try{
-    const ctx=new (window.AudioContext||window.webkitAudioContext)();
-    const o=ctx.createOscillator(), g=ctx.createGain();
-    o.type="square"; o.frequency.value=freq; g.gain.value=vol;
-    o.connect(g); g.connect(ctx.destination); o.start();
-    setTimeout(()=>{o.stop();ctx.close();}, dur*1000);
-  }catch(e){}
+let hero, bullets, enemies, pickups, particles;
+let score, combo, hiscore=+localStorage.getItem("ac_hiscore_v2")||0, lives, diff, speed, spawnTick;
+
+/*************** AUDIO ***************/
+let musicOn=false, bg=new Audio(); bg.loop=true; bg.volume=.35; if(defaultTrack) bg.src=defaultTrack;
+function beep(freq=440,dur=0.07,vol=0.05){
+  try{const C=new (window.AudioContext||window.webkitAudioContext)(),o=C.createOscillator(),g=C.createGain();
+  o.type="square";o.frequency.value=freq;g.gain.value=vol;o.connect(g);g.connect(C.destination);o.start();
+  setTimeout(()=>{o.stop();C.close();},dur*1000);}catch(e){}
 }
 
-/*** ============ INPUT ============ ***/
-function setLane(n){ hero.lane = clamp(n,0,LANES-1); }
-function up(){ setLane(hero.lane-1); beep(520,0.05,0.03); }
-function down(){ setLane(hero.lane+1); beep(420,0.05,0.03); }
+/*************** INPUT ***************/
+function setLane(n){ hero.lane=clamp(n,0,LANES-1); }
+function up(){ setLane(hero.lane-1); beep(540,0.05,0.03);}
+function down(){ setLane(hero.lane+1); beep(420,0.05,0.03);}
 function fire(){
-  if(hero.cd>0) return;
-  const power = hero.power>0 ? 3 : 1;
-  for(let i=0;i<power;i++){
-    bullets.push({x:hero.x+18,y: laneY(hero.lane)-10 + i*10 ,vx:7,rad:6,life:120});
-  }
-  hero.cd = hero.power>0 ? 8 : 12;
-  beep(780,0.05,0.04);
+  if(hero.cd>0)return;
+  const shots = hero.power>0?3:1;
+  for(let i=0;i<shots;i++){ bullets.push({x:hero.x+22,y:laneY(hero.lane)-8+i*10,vx:6.2,rad:7,life:140}); }
+  hero.cd=hero.power>0?8:12; beep(780,0.05,0.04);
 }
 function togglePause(){ paused=!paused; if(!paused && loopId===null) loop(); }
 function reset(){
-  score=0; combo=0; lives=MAX_LIVES; diff=1; speed=SPEED_BASE;
-  bullets.length=0; enemies.length=0; pickups.length=0; particles.length=0;
-  hero={lane:1,x:80,y:0,rad:18,cd:0,shield:0,power:0,alive:true};
-  frame=0; spawnTick=0; paused=false;
+  score=0;combo=0;lives=MAX_LIVES;diff=1;speed=SPEED_BASE;
+  bullets=[];enemies=[];pickups=[];particles=[];
+  hero={lane:1,x:90,y:0,rad:20,cd:0,shield:0,power:0,alive:true};
+  frame=0;spawnTick=0;paused=false;
 }
 
-window.addEventListener("keydown",e=>{
-  if(e.key==='w'||e.key==='ArrowUp') up();
-  if(e.key==='s'||e.key==='ArrowDown') down();
-  if(e.key===' ') { e.preventDefault(); fire(); }
-  if(e.key.toLowerCase()==='p') togglePause();
-});
-$("#upBtn").onclick=up; $("#downBtn").onclick=down; $("#fireBtn").onclick=fire;
-
-/*** ============ UI BOTONES ============ ***/
+/*************** UI ***************/
 $("#btnPause").onclick=togglePause;
-$("#btnReset").onclick=()=>{ reset(); };
-$("#btnMusic").onclick=async()=>{
-  musicOn=!musicOn;
-  if(musicOn){ try{ await bg.play(); }catch{} }
-  else{ try{ bg.pause(); }catch{} }
-  $("#btnMusic").textContent = "🎵 Música: "+(musicOn?"ON":"OFF");
-};
-$("#loadTrack").onclick=()=>{
-  const inp=document.createElement("input"); inp.type="file"; inp.accept="audio/*";
-  inp.onchange=()=>{ const f=inp.files[0]; if(!f) return; bg.src=URL.createObjectURL(f); musicOn=true; bg.play(); $("#btnMusic").textContent="🎵 Música: ON"; };
-  inp.click();
-};
+$("#btnReset").onclick=reset;
+$("#btnMusic").onclick=async()=>{musicOn=!musicOn; if(musicOn){try{await bg.play();}catch{}} else{try{bg.pause();}catch{}}; $("#btnMusic").textContent="🎵 Música: "+(musicOn?"ON":"OFF");}
+$("#loadTrack").onclick=()=>{const i=document.createElement("input"); i.type="file"; i.accept="audio/*";
+  i.onchange=()=>{const f=i.files[0]; if(!f)return; bg.src=URL.createObjectURL(f); musicOn=true; bg.play(); $("#btnMusic").textContent="🎵 Música: ON";}; i.click();};
 
-/*** ============ DIBUJOS (VECTOR CÓMIC) ============ ***/
-function drawHero(x,y,r){
-  // máscara + capa tipo superhéroe indie
+const sSpeed=$("#speed"), sSpawn=$("#spawn"), sHit=$("#hitbox");
+sSpeed.oninput=()=>{SPEED_BASE=+sSpeed.value; $("#sv").textContent=SPEED_BASE.toFixed(1); speed=SPEED_BASE;}
+sSpawn.oninput=()=>{SPAWN_EVERY=+sSpawn.value; $("#sp").textContent=SPAWN_EVERY;}
+sHit.oninput=()=>{HITBOX=+sHit.value; $("#hb").textContent=HITBOX.toFixed(1);}
+$("#btnChill").onclick=()=>{sSpeed.value=2.0; sSpawn.value=86; sHit.value=1.35; sSpeed.oninput(); sSpawn.oninput(); sHit.oninput();}
+$("#btnNormal").onclick=()=>{sSpeed.value=2.6; sSpawn.value=72; sHit.value=1.2; sSpeed.oninput(); sSpawn.oninput(); sHit.oninput();}
+$("#btnInsane").onclick=()=>{sSpeed.value=3.4; sSpawn.value=54; sHit.value=1.0; sSpeed.oninput(); sSpawn.oninput(); sHit.oninput();}
+
+/*************** DIBUJO (estética cómic con tu guitarra‑cara) ***************/
+function drawHeroGuitar(x,y,r){
+  // cuerpo principal (rojo) con “lengua”
   cx.save(); cx.translate(x,y);
-  // capa
-  cx.fillStyle="rgba(255,60,126,0.25)";
-  cx.beginPath(); cx.moveTo(-10,0); cx.quadraticCurveTo(-40,20,-50,50); cx.lineTo(-10,30); cx.closePath(); cx.fill();
-  // cuerpo
-  cx.fillStyle="#39d98a"; cx.beginPath(); cx.arc(0,0,r,0,Math.PI*2); cx.fill();
-  // antifaz
-  cx.fillStyle="#111"; cx.fillRect(-r*0.8,-r*0.2,r*1.6,r*0.4);
-  // rayo pecho
-  cx.fillStyle="#ff3c7e"; cx.beginPath(); cx.moveTo(-6,8); cx.lineTo(2,-2); cx.lineTo(-2,10); cx.lineTo(6,0); cx.lineTo(0,14); cx.closePath(); cx.fill();
-  // escudo visual
-  if(hero.shield>0){ cx.strokeStyle="#ffc857"; cx.lineWidth=2; cx.beginPath(); cx.arc(0,0,r+4,0,Math.PI*2); cx.stroke(); }
+  // sombra
+  cx.fillStyle="rgba(0,0,0,0.25)"; cx.beginPath(); cx.ellipse(0,r+18,28,10,0,0,Math.PI*2); cx.fill();
+  // cuerpo rojo
+  cx.fillStyle="#e6252f"; cx.beginPath(); cx.moveTo(-20,10); cx.bezierCurveTo(-28,0,-26,-16,-10,-22);
+  cx.bezierCurveTo(6,-28,20,-16,20,6); cx.bezierCurveTo(22,24,10,34,0,34); cx.bezierCurveTo(-14,34,-22,24,-20,10); cx.fill();
+  // golpeador negro
+  cx.fillStyle="#0c0c12"; cx.beginPath(); cx.moveTo(6,-14); cx.quadraticCurveTo(16,-8,12,8); cx.quadraticCurveTo(2,10,-2,6); cx.fill();
+  // ojo
+  cx.fillStyle="#fff"; cx.beginPath(); cx.arc(-6,-2,6,0,Math.PI*2); cx.fill();
+  cx.fillStyle="#0c0c12"; cx.beginPath(); cx.arc(-6,-2,3,0,Math.PI*2); cx.fill();
+  // pestañas
+  cx.strokeStyle="#0c0c12"; cx.lineWidth=2; for(let i=0;i<5;i++){ const a=-Math.PI/2 + i*0.35; cx.beginPath(); cx.moveTo(-6,-2); cx.lineTo(-6+Math.cos(a)*10,-2+Math.sin(a)*10); cx.stroke(); }
+  // boca + lengua
+  cx.fillStyle="#0c0c12"; cx.fillRect(-10,14,20,6);
+  cx.fillStyle="#fff"; cx.beginPath(); cx.arc(0,22,8,0,Math.PI*2); cx.fill();
+  cx.fillStyle="#0c0c12"; cx.fillRect(-1,14,2,16);
+  // mástil negro
+  cx.fillStyle="#0c0c12"; cx.fillRect(-6,-38,12,24);
+  // cuerdas amarillas
+  cx.strokeStyle="#ffd11a"; cx.lineWidth=2; for(let i=-4;i<=4;i+=4){ cx.beginPath(); cx.moveTo(i,-36); cx.lineTo(i,-14); cx.stroke(); }
+  // escudo
+  if(hero.shield>0){ cx.strokeStyle="#ffd166"; cx.lineWidth=2; cx.beginPath(); cx.arc(0,6,(r+4)*HITBOX,0,Math.PI*2); cx.stroke(); }
   cx.restore();
 }
 
 function drawEnemy(e){
   cx.save(); cx.translate(e.x,e.y);
-  if(e.type==="contract"){ // 🧾 cláusula
-    cx.fillStyle="#eae6ff"; cx.fillRect(-16,-20,32,40);
+  if(e.type==="contract"){ // cláusula
+    cx.fillStyle="#f3f1ff"; cx.fillRect(-16,-20,32,40);
     cx.fillStyle="#ff5d5d"; for(let i=0;i<4;i++){ cx.fillRect(-12,-14+i*8,24,3); }
     cx.strokeStyle="#222"; cx.strokeRect(-16,-20,32,40);
-  } else if(e.type==="briefcase"){ // 💼 maletín
-    cx.fillStyle="#3b2a2a"; cx.fillRect(-22,-14,44,28);
-    cx.fillStyle="#222"; cx.fillRect(-10,-22,20,8);
-    cx.fillStyle="#ffc857"; cx.fillRect(-22,-2,44,4);
-  } else { // drone copyright
-    cx.fillStyle="#8891ff"; cx.beginPath(); cx.arc(0,0,14,0,Math.PI*2); cx.fill();
+  }else if(e.type==="briefcase"){
+    cx.fillStyle="#3a2a2a"; cx.fillRect(-22,-12,44,24); cx.fillStyle="#111"; cx.fillRect(-8,-20,16,8);
+    cx.fillStyle="#ffd166"; cx.fillRect(-20,-2,40,4);
+  }else{ // drone copyright
+    cx.fillStyle="#8a92ff"; cx.beginPath(); cx.arc(0,0,14,0,Math.PI*2); cx.fill();
     cx.fillStyle="#111"; cx.fillRect(-24,-2,48,4); cx.fillRect(-2,-24,4,48);
     cx.fillStyle="#ff5d5d"; cx.fillRect(-6,-6,12,12);
   }
   cx.restore();
 }
-
 function drawPickup(p){
   cx.save(); cx.translate(p.x,p.y);
-  // FANZINE 📰 (power-shot + escudo)
   cx.fillStyle="#fff"; cx.fillRect(-14,-18,28,36);
   cx.fillStyle="#111"; cx.fillRect(-10,-12,20,8);
   cx.fillStyle="#ff3c7e"; cx.fillRect(-10,0,20,3);
-  cx.fillStyle="#39d98a"; cx.fillRect(-10,6,20,3);
+  cx.fillStyle="#38d993"; cx.fillRect(-10,6,20,3);
   cx.restore();
 }
-
-function drawBullet(b){
-  cx.save(); cx.translate(b.x,b.y);
-  cx.fillStyle="#ffc857"; cx.beginPath(); cx.arc(0,0,b.rad,0,Math.PI*2); cx.fill();
-  cx.restore();
-}
-
+function drawBullet(b){ cx.fillStyle="#ffd166"; cx.beginPath(); cx.arc(b.x,b.y,b.rad,0,Math.PI*2); cx.fill(); }
 function backdrop(){
-  // líneas de velocidad + skyline cómic
-  cx.fillStyle="#0a0a14"; cx.fillRect(0,0,w,h);
-  cx.strokeStyle="#14142a"; cx.lineWidth=2;
-  for(let i=0;i<LANES;i++){
-    const y=laneY(i);
-    cx.beginPath(); cx.moveTo(0,y+28); cx.lineTo(w,y+28); cx.stroke();
-  }
-  // edificios simples
-  cx.fillStyle="#14142a";
-  for(let x=0;x<w;x+=60){
-    const hh = 40 + (x%120);
-    cx.fillRect(x, h- hh, 40, hh);
-  }
+  cx.fillStyle="#0a0a16"; cx.fillRect(0,0,w,h);
+  // líneas carril
+  cx.strokeStyle="#1b1b38"; cx.lineWidth=2;
+  for(let i=0;i<LANES;i++){ const y=laneY(i)+30; cx.beginPath(); cx.moveTo(0,y); cx.lineTo(w,y); cx.stroke(); }
+  // estrellas/viñetas
+  for(let x=0;x<w;x+=60){ cx.fillStyle="#141436"; const hh=40+(x%120); cx.fillRect(x,h-hh,36,hh); }
 }
 
-/*** ============ SPAWN & PROGRESIÓN ============ ***/
+/*************** SPAWNS ***************/
 function spawnEnemy(){
-  const lane = Math.floor(rnd(0,LANES));
-  const types = ["contract","briefcase","drone"];
-  const t = types[Math.floor(rnd(0,types.length))];
-  const speedVar = speed + rnd(1,2.5);
-  enemies.push({x:w+30,y:laneY(lane),vx:-speedVar,rad:16,type:t,hp:(t==="briefcase"?2:1),lane});
+  const lane=Math.floor(rnd(0,LANES));
+  const types=["contract","briefcase","drone"];
+  const t=types[Math.floor(rnd(0,types.length))];
+  enemies.push({x:w+34,y:laneY(lane),vx:-(speed+rnd(0.6,1.4)),rad:16*HITBOX,type:t,hp:(t==="briefcase"?2:1),lane});
 }
 function spawnPickup(){
-  const lane = Math.floor(rnd(0,LANES));
-  pickups.push({x:w+20,y:laneY(lane),vx:-speed,rad:14,kind:"fanzine"});
+  const lane=Math.floor(rnd(0,LANES));
+  pickups.push({x:w+26,y:laneY(lane),vx:-speed,rad:14*HITBOX,kind:"fanzine"});
 }
 
-/*** ============ LOOP PRINCIPAL ============ ***/
+/*************** LOOP ***************/
 let loopId=null;
 function loop(){
   loopId=requestAnimationFrame(loop);
   if(paused) return;
   frame++; spawnTick++;
 
-  // subida de dificultad gradual
-  if(frame%600===0){ diff++; speed += DIFF_STEP; $("#diff").textContent=diff; }
+  if(frame%640===0){ diff++; speed+=DIFF_STEP; $("#diff").textContent=diff; }
 
-  // fondo y HUD
   backdrop();
-
-  // actualizar héroe
-  hero.y = laneY(hero.lane);
+  hero.y=laneY(hero.lane);
   if(hero.cd>0) hero.cd--;
   if(hero.shield>0) hero.shield--;
   if(hero.power>0) hero.power--;
 
-  // spawns
-  if(spawnTick>=SPAWN_EVERY*Math.max(0.5, 1-(diff*0.07))){ spawnTick=0; spawnEnemy(); if(chance(0.22)) spawnEnemy(); if(chance(0.08)) spawnPickup(); }
+  if(spawnTick>=SPAWN_EVERY*Math.max(0.55,1-(diff*0.06))){
+    spawnTick=0; spawnEnemy(); if(Math.random()<0.18) spawnEnemy(); if(Math.random()<0.08) spawnPickup();
+  }
 
   // bullets
   for(let i=bullets.length-1;i>=0;i--){
-    const b=bullets[i]; b.x+=b.vx; if(--b.life<=0 || b.x>w+40) { bullets.splice(i,1); continue; }
-    // colisiones bala-enemigo
+    const b=bullets[i]; b.x+=b.vx; if(--b.life<=0||b.x>w+40){ bullets.splice(i,1); continue; }
     for(let j=enemies.length-1;j>=0;j--){
-      const e=enemies[j];
-      const dx=b.x-e.x, dy=b.y-e.y;
+      const e=enemies[j], dx=b.x-e.x, dy=b.y-e.y;
       if(dx*dx+dy*dy < (b.rad+e.rad)*(b.rad+e.rad)){
-        enemies[j].hp--; bullets.splice(i,1);
-        combo++; score += 10*diff + combo;
-        particles.push({x:e.x,y:e.y,life:18});
-        beep(880,0.04,0.05);
-        if(e.hp<=0){ enemies.splice(j,1); }
+        e.hp--; bullets.splice(i,1);
+        combo++; score += 8*diff + combo;
+        if(e.hp<=0){ enemies.splice(j,1); beep(920,0.05,0.05); }
         break;
       }
     }
@@ -279,15 +250,10 @@ function loop(){
   // enemigos
   for(let i=enemies.length-1;i>=0;i--){
     const e=enemies[i]; e.x+=e.vx;
-    // colisión héroe
     const dx=e.x-hero.x, dy=e.y-hero.y;
-    if(dx*dx+dy*dy < (e.rad+hero.rad)*(e.rad+hero.rad)){
-      if(hero.shield>0){ // consume escudo
-        hero.shield=0; enemies.splice(i,1); particles.push({x:e.x,y:e.y,life:14}); beep(300,0.05,0.04);
-      }else{
-        lives--; combo=0; enemies.splice(i,1); screenShake(); beep(120,0.07,0.06);
-        if(lives<=0){ gameOver(); return; }
-      }
+    if(dx*dx+dy*dy < (e.rad+hero.rad*HITBOX)*(e.rad+hero.rad*HITBOX)){
+      if(hero.shield>0){ hero.shield=0; enemies.splice(i,1); beep(320,0.04,0.05); }
+      else{ lives--; combo=0; enemies.splice(i,1); screenShake(); beep(140,0.08,0.06); if(lives<=0){ gameOver(); return; } }
     }else if(e.x<-40){ enemies.splice(i,1); }
   }
 
@@ -295,47 +261,35 @@ function loop(){
   for(let i=pickups.length-1;i>=0;i--){
     const p=pickups[i]; p.x-=speed;
     const dx=p.x-hero.x, dy=p.y-hero.y;
-    if(dx*dx+dy*dy < (p.rad+hero.rad)*(p.rad+hero.rad)){
-      // fanzine → power‑shot y escudo corto
-      hero.power=240; hero.shield=240; score+=150*diff; combo+=5; pickups.splice(i,1);
-      beep(520,0.08,0.06);
+    if(dx*dx+dy*dy < (p.rad+hero.rad*HITBOX)*(p.rad+hero.rad*HITBOX)){
+      hero.power=260; hero.shield=220; score+=120*diff; combo+=4; pickups.splice(i,1); beep(560,0.08,0.06);
     }else if(p.x<-30){ pickups.splice(i,1); }
   }
 
-  // partículas
-  for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i]; p.life--; cx.fillStyle="rgba(255,200,87,"+(p.life/18)+")"; cx.beginPath(); cx.arc(p.x+rnd(-4,4),p.y+rnd(-4,4),rnd(1,3),0,Math.PI*2); cx.fill();
-    if(p.life<=0) particles.splice(i,1);
-  }
+  // dibujar
+  drawHeroGuitar(hero.x,hero.y,hero.rad);
+  enemies.forEach(drawEnemy); pickups.forEach(drawPickup); bullets.forEach(drawBullet);
 
-  // dibujar entidades
-  drawHero(hero.x,hero.y,hero.rad);
-  enemies.forEach(drawEnemy);
-  pickups.forEach(drawPickup);
-  bullets.forEach(drawBullet);
-
-  // puntuación y vidas
   $("#score").textContent=score; $("#combo").textContent=combo; $("#lives").textContent=lives; $("#hiscore").textContent=hiscore;
 }
 function gameOver(){
-  paused=true;
-  if(score>hiscore){ hiscore=score; localStorage.setItem("ac_hiscore",hiscore); }
-  setTimeout(()=>{
-    alert("💥 GAME OVER\nPuntos: "+score+"\nRécord: "+hiscore+"\nConsejo: encadena combos y busca FANZINES 📰");
-    reset(); paused=false;
-  },50);
+  paused=true; if(score>hiscore){ hiscore=score; localStorage.setItem("ac_hiscore_v2",hiscore); }
+  setTimeout(()=>{ alert("💥 GAME OVER\nPuntos: "+score+"\nRécord: "+hiscore+"\nConsejo: usa los FANZINES para escudo y disparo triple."); reset(); paused=false; },50);
 }
+function screenShake(){ const b=cv.style.transform; cv.style.transform="translateX(4px)"; setTimeout(()=>cv.style.transform=b,80); }
 
-let shaken=false;
-function screenShake(){
-  if(shaken) return; shaken=true;
-  const base = cv.style.transform;
-  cv.style.transform="translateX(4px)";
-  setTimeout(()=>{cv.style.transform=base; shaken=false;},80);
-}
+/*************** INPUT ***************/
+window.addEventListener("keydown",e=>{
+  if(e.key==='w'||e.key==='ArrowUp') up();
+  if(e.key==='s'||e.key==='ArrowDown') down();
+  if(e.key===' '){ e.preventDefault(); fire(); }
+  if(e.key.toLowerCase()==='p') togglePause();
+});
+$("#upBtn").onclick=up; $("#downBtn").onclick=down; $("#fireBtn").onclick=fire;
 
-/*** ============ START ============ ***/
-reset(); loop();
+/*************** START ***************/
+function start(){ $("#sv").textContent=SPEED_BASE.toFixed(1); $("#sp").textContent=SPAWN_EVERY; $("#hb").textContent=HITBOX.toFixed(1); reset(); loop(); }
+start();
 </script>
 </body>
 </html>
